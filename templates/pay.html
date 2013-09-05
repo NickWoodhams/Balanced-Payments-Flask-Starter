@@ -1,0 +1,163 @@
+{% extends 'layout.html' %}
+
+
+{% block body %}
+<div class="page-header">
+  <h1>Pay {{ order.username }}</h1>
+</div>
+<p class="lead">
+	<div class="item">
+		{{ order.item|title }}
+	</div>
+	<div class="">
+		{{ order.price|format_currency }}
+	</div>
+</p>
+<form action="" method="POST" id="paymentform" class="form-vertical">
+    <fieldset>
+   
+       	<!--start balanced form-->
+        <div class="form-group">
+        	<label class="control-label">Card Number<abbr title="Required">*</abbr></label>
+        	    <div class="controls">
+        	    	<input type="text"
+        	    	       autocomplete="off"
+        	    	       placeholder="Card Number"
+        	    	       class="cc-number">
+        	    </div>
+        </div>
+        <div class="form-group">
+        	<label class="control-label">Expiration<abbr title="Required">*</abbr></label>
+        	    <div class="controls">
+        	    	<input type="text"
+        	    	       autocomplete="off"
+        	    	       placeholder="MM"
+        	    	       class="cc-em">
+        	    	<span>/</span>
+        	    	<input type="text"
+        	    	       autocomplete="off"
+        	    	       placeholder="YYYY"
+        	    	       class="cc-ey">
+        	    </div>
+        </div>
+        <div class="form-group">
+        	<label class="control-label">Security Code<abbr title="Required">*</abbr></label>
+        	    <div class="controls">
+        	    	<input type="text"
+        	    	       autocomplete="off"
+        	    	       placeholder="CSC"
+        	    	       class="cc-csc">
+        	    </div>
+        </div>
+        <div class="form-group">
+        	<div class="controls">
+        		<button type="submit" id="pay" class="btn btn-primary">
+        		    Complete order
+        		</button>
+        	</div>
+        </div>
+    </fieldset>
+</form>
+{% endblock body %}
+
+
+{% block javascript %}
+<script type="text/javascript" src="https://js.balancedpayments.com/v1/balanced.js"></script>
+<script>
+$(function(){
+	var requestBinURL = 'http://requestb.in/18bkged1';
+	var marketplaceUri = "{{ config['BALANCED_MARKETPLACE_URI'] }}";
+	balanced.init(marketplaceUri);
+
+	function errorHandler(response) {
+		errors = response.error;
+		// console.log(errors);
+
+		if (errors.card_number) {
+			$('.cc-number').parent().parent().addClass('has-error');
+			$('.cc-number').after('<span class="help-block">' + errors.card_number + '</span>');
+		}
+
+		if (errors.expiration_month) {
+			$('.cc-em').parent().parent().addClass('has-error');
+		}
+
+		if (errors.expiration_year) {
+			$('.cc-ey').parent().parent().addClass('has-error');
+		}
+
+		if (errors.expiration) {
+			alert(errors.expiration);
+		}
+
+		$('#pay').removeAttr('disabled');
+	}
+
+	function responseCallbackHandler(response) {
+      switch (response.status) {
+        case 400:
+            // missing or invalid field - check response.error for details
+            errorHandler(response);
+            break;
+        case 402:
+        	alert("Invalid card");
+        case 404:
+            // your marketplace URI is incorrect
+            errorHandler(response);
+            break;
+        case 201:
+            // WOO HOO! MONEY!
+            // response.data.uri == URI of the bank account resource you
+            // should store this bank account URI to later credit it
+            // console.log(response.data);
+            var $form = $("#paymentform");
+            // the uri is an opaque token referencing the tokenized bank account
+            var cardTokenURI = response.data['uri'];
+            // append the token as a hidden field to submit to the server
+            $('<input>').attr({
+               type: 'hidden',
+               value: cardTokenURI,
+               name: 'balancedCreditCardURI'
+            }).appendTo($form);
+            // $form.attr({action: requestBinURL});
+            $form.get(0).submit();
+        }
+    }
+
+	var tokenizeInstrument = function(e) {
+       e.preventDefault();
+   
+       var $form = $('#paymentform');
+
+       //remove all previous errors
+       $('.form-group.has-error').find('.help-block').remove();
+       $('.form-group').removeClass('has-error');
+
+       //disable button to prevent multiple clicks
+       $('#pay').attr('disabled', 'disabled');
+
+		//make sure they input a csc even though not really required
+		if ($('.cc-csc').val() == "") {
+			$('.cc-csc').parent().parent().addClass('has-error');
+			$('.cc-csc').after('<span class="help-block">Security code required</span>');
+			$('#pay').removeAttr('disabled');
+			return false;
+		}
+
+		//prepare data for balanced
+       var creditCardData = {
+            card_number: $form.find('.cc-number').val(),
+            expiration_month: $form.find('.cc-em').val(),
+            expiration_year: $form.find('.cc-ey').val(),
+            security_code: $form.find('cc-csc').val()
+        };
+ 
+ 		//create balanced token
+        balanced.card.create(creditCardData, responseCallbackHandler);
+
+    };
+   $('#paymentform').submit(tokenizeInstrument);
+	
+});
+</script>
+{% endblock javascript %}

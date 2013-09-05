@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="page-header">
+  <h1>My Marketplace</h1>
+</div>
+<p class="lead">Buy and sell great stuff</p>
+{{ form_fields(form, class="", button_title="Go to checkout", button_class="btn-primary") }}
+{% endblock body %}
+
+
+{% block javascript %}
+<script>
+$(document.ready(function(){
+
+}));
+</script>
+{% endblock javascript %}

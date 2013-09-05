@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="page-header">
+  <h1>Pay {{ username }}</h1>
+</div>
+<p class="lead">Please enter your address</p>
+<form action="" class="form-vertical" method="POST">
+	{# gather user details #}
+	{# these form fields are generated with the help of custom macros I built #}
+	{# the form macros were customized to bootstrap and are located in templates/macros/forms.html #}
+	
+	{{ form.csrf_token }}
+	{{ form_field(form.name) }}
+	{{ form_field(form.email) }}
+
+	{{ form_field(form.street) }}
+	{{ form_field(form.street2) }}
+	{{ form_field(form.city) }}
+	{{ form_field(form.state) }}
+	{{ form_field(form.zip_code) }}
+	{{ form_field(form.country) }}
+	
+	{{ form_field(form.username) }}
+	{{ form_field(form.price) }}
+
+	<button type="submit" class="btn btn-primary">Continue ></button>
+</form>
+{% endblock body %}
+
+
+{% block javascript %}
+<script>
+$(document.ready(function(){
+
+}));
+</script>
+{% endblock javascript %}

@@ -1,0 +1,78 @@
+{% from "macros/forms.html" import form_field_label, form_field_description, form_field_errors, form_field_radio, 
+                                   form_field_checkbox, form_button, form_field, form_field_bare, form_fields %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Web Jobs search by API Xchange">
+    <meta name="author" content="nicholas.woodhams@gmail.com">
+
+    <title>My Marketplace</title>
+
+    <!-- Bootstrap + Custom styles -->
+    <link href="/static/css/styles.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <!-- Wrap all page content here -->
+    <div id="wrap">
+
+      <!-- Fixed navbar -->
+      <div class="navbar navbar-fixed-top">
+        <div class="container">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">My Marketplace</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li {% if request.path == "/" %}class="active"{% endif %}><a href="/">Home</a></li>
+              <!-- <li {% if request.path == "/saved-searches" %}class="active"{% endif %}><a href="/">Saved searches</a></li> -->
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+
+      <!-- Begin page content -->
+      <div class="container">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} fade in flash">
+              <button type="button" class="close" data-dismiss="alert">&times;</button>
+              {% if message.split('-')[0] %}
+                <h3>{{ message.split(' - ')[0] }}</h3>
+              {% endif %}
+              <p>{{ message.split(' - ')[1] }}</p>
+            </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% block body %}{% endblock body %}
+      </div>
+    </div>
+
+    <div id="footer">
+      <div class="container">
+        <p class="text-muted credit">a spectacular marketplace by My Marketplace &copy;</p>
+      </div>
+    </div>
+
+    <!-- include scripts here -->
+    <script src="/static/js/jquery-2.0.3.min.js"></script>
+    <script src="/static/js/alert.js"></script>
+    <script src="/static/js/button.js"></script>
+    <script src="/static/js/dropdown.js"></script>
+    <script src="/static/js/modal.js"></script>
+    <script src="/static/js/popover.js"></script>
+    <script src="/static/js/tooltip.js"></script>
+    <script src="/static/js/transition.js"></script>
+    {% block javascript %}
+    {% endblock javascript %}
+  </body>
+</html>
